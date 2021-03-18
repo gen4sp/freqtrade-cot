@@ -372,17 +372,24 @@ class TenderEnter(IStrategy):
         
         # avgVolty = np.mean(dataframe['high'][-9:] - dataframe['low'][-9:])
         dataframe.loc[(
-            (dataframe['close'] > dataframe['close'].shift(1)) & 
-            (dataframe['close']  > dataframe['ema21']) & 
+            # (dataframe['close'] > dataframe['close'].shift(1)) & 
+            # (dataframe['close']  > dataframe['ema21']) & 
             # (dataframe['close'] - dataframe['close'].shift(1) > dataframe['close'].shift(1) - dataframe['close'].shift(2)) & 
-            (dataframe['ema21'] > dataframe['ema21'].shift(1)) & 
-            (dataframe['ema50'] > dataframe['ema50'].shift(1)) & 
-            (dataframe['ema100'] > dataframe['ema100'].shift(1)) & 
-            (dataframe['volume'] > dataframe['volume'].shift(1)) &
+            # (dataframe['ema21'] > dataframe['ema21'].shift(1)) & 
+            # (dataframe['ema50'] > dataframe['ema50'].shift(1)) & 
+            # (dataframe['ema100'] > dataframe['ema100'].shift(1)) & 
+            # (dataframe['volume'] > dataframe['volume'].shift(1)) &
             # self.calcAngle(dataframe['tema'].shift(1),dataframe['tema'],avgVolty) &
-            (dataframe['ema10'] > dataframe['sma10']) &  
+            # (dataframe['ema10'] > dataframe['sma10']) &  
+            self.compareFields(dataframe, 'close', 1) &
+            self.compareFields(dataframe, 'close', 2) &
+            self.compareFields(dataframe, 'volume', 1) &
+            self.compareFields(dataframe, 'volume', 2) &
             (dataframe['volume'] > 0)),'buy'] = 1
         return dataframe
+
+    def compareFields(self, dt, fieldname, shift, ratio=1.034):
+        return dt[fieldname].shift(shift)/dt[fieldname] > ratio
 
     def calcAngle(self, p1, p2, delta_x) -> bool:
         delta_y = p2 - p1
