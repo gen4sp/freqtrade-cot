@@ -37,11 +37,17 @@ class TenderEnter(IStrategy):
     custom_stops = {}
     # Minimal ROI designed for the strategy.
     # This attribute will be overridden if the config file contains "minimal_roi".
+    # minimal_roi = {
+    #     "180":  0.05, # 5% after 240 min
+    #     "200":  0.03,
+    #     "240":  0.00,
+    #     "0":  0.08 # 8% imidietly
+    # }
     minimal_roi = {
-        "180":  0.05, # 5% after 240 min
-        "200":  0.03,
+        "180":  0.2, # 5% after 240 min
+        "200":  0.1,
         "240":  0.00,
-        "0":  0.08 # 8% imidietly
+        "0":  0.3 # 8% imidietly
     }
 
     # Optimal stoploss designed for the strategy.
@@ -132,7 +138,7 @@ class TenderEnter(IStrategy):
         :param metadata: Additional information, like the currently traded pair
         :return: a Dataframe with all mandatory indicators for the strategies
         """
-        pairs = self.dp.current_whitelist()
+        # pairs = self.dp.current_whitelist()
         
         # self.custom_stops = {pair: False for pair in pairs}
         # for pair in pairs:
@@ -255,17 +261,17 @@ class TenderEnter(IStrategy):
 
         # # EMA - Exponential Moving Average
         # dataframe['ema3'] = ta.EMA(dataframe, timeperiod=3)
-        dataframe['ema5'] = ta.EMA(dataframe, timeperiod=5)
-        dataframe['ema10'] = ta.EMA(dataframe, timeperiod=10)
-        dataframe['ema21'] = ta.EMA(dataframe, timeperiod=21)
-        dataframe['ema50'] = ta.EMA(dataframe, timeperiod=50)
-        dataframe['ema100'] = ta.EMA(dataframe, timeperiod=100)
+        # dataframe['ema5'] = ta.EMA(dataframe, timeperiod=5)
+        # dataframe['ema10'] = ta.EMA(dataframe, timeperiod=10)
+        # dataframe['ema21'] = ta.EMA(dataframe, timeperiod=21)
+        # dataframe['ema50'] = ta.EMA(dataframe, timeperiod=50)
+        # dataframe['ema100'] = ta.EMA(dataframe, timeperiod=100)
 
         # # SMA - Simple Moving Average
         # dataframe['sma3'] = ta.SMA(dataframe, timeperiod=3)
-        dataframe['sma5'] = ta.SMA(dataframe, timeperiod=5)
-        dataframe['sma10'] = ta.SMA(dataframe, timeperiod=10)
-        dataframe['sma21'] = ta.SMA(dataframe, timeperiod=21)
+        # dataframe['sma5'] = ta.SMA(dataframe, timeperiod=5)
+        # dataframe['sma10'] = ta.SMA(dataframe, timeperiod=10)
+        # dataframe['sma21'] = ta.SMA(dataframe, timeperiod=21)
         # dataframe['sma50'] = ta.SMA(dataframe, timeperiod=50)
         # dataframe['sma100'] = ta.SMA(dataframe, timeperiod=100)
 
@@ -273,7 +279,7 @@ class TenderEnter(IStrategy):
         # dataframe['sar'] = ta.SAR(dataframe)
 
         # TEMA - Triple Exponential Moving Average
-        dataframe['tema'] = ta.TEMA(dataframe, timeperiod=9)
+        # dataframe['tema'] = ta.TEMA(dataframe, timeperiod=9)
 
         # Cycle Indicator
         # ------------------------------------
@@ -360,27 +366,8 @@ class TenderEnter(IStrategy):
         :param metadata: Additional information, like the currently traded pair
         :return: DataFrame with buy column
         """
-        # dataframe.loc[
-        #     (
-        #         (dataframe['close_15m'] > dataframe['close_15m'].shift(1)) & 
-        #         (dataframe['close'] > dataframe['close'].shift(1)) & 
-        #         (dataframe['close'].shift(1) > dataframe['close'].shift(2)) & 
-        #         (dataframe['tema'] > dataframe['tema'].shift(1)) &  # Guard: tema is raising
-        #         (dataframe['volume'] > 0)  # Make sure Volume is not 0
-        #     ),
-        #     'buy'] = 1
-        
-        # avgVolty = np.mean(dataframe['high'][-9:] - dataframe['low'][-9:])
+    
         dataframe.loc[(
-            # (dataframe['close'] > dataframe['close'].shift(1)) & 
-            # (dataframe['close']  > dataframe['ema21']) & 
-            # (dataframe['close'] - dataframe['close'].shift(1) > dataframe['close'].shift(1) - dataframe['close'].shift(2)) & 
-            # (dataframe['ema21'] > dataframe['ema21'].shift(1)) & 
-            # (dataframe['ema50'] > dataframe['ema50'].shift(1)) & 
-            # (dataframe['ema100'] > dataframe['ema100'].shift(1)) & 
-            # (dataframe['volume'] > dataframe['volume'].shift(1)) &
-            # self.calcAngle(dataframe['tema'].shift(1),dataframe['tema'],avgVolty) &
-            # (dataframe['ema10'] > dataframe['sma10']) &  
             self.compareFields(dataframe, 'close', 1) &
             self.compareFields(dataframe, 'close', 2) &
             self.compareFields(dataframe, 'volume', 1) &
@@ -391,24 +378,24 @@ class TenderEnter(IStrategy):
     def compareFields(self, dt, fieldname, shift, ratio=1.034):
         return dt[fieldname].shift(shift)/dt[fieldname] > ratio
 
-    def calcAngle(self, p1, p2, delta_x) -> bool:
-        delta_y = p2 - p1
-        theta_radians = np.arctan2(delta_y, delta_x)
-        return theta_radians < -0.900275
+    # def calcAngle(self, p1, p2, delta_x) -> bool:
+    #     delta_y = p2 - p1
+    #     theta_radians = np.arctan2(delta_y, delta_x)
+    #     return theta_radians < -0.900275
 
-    def confirm_trade_entry(self, pair: str, order_type: str, amount: float, rate: float,
-                            time_in_force: str, **kwargs) -> bool:
-        print('z', metadata["pair"], self.custom_stops[metadata["pair"]])                    
-        if self.custom_stops[metadata["pair"]] == False:
-            self.custom_stops[metadata["pair"]] = True
-            return True
-        else:
-            return False
+    # def confirm_trade_entry(self, pair: str, order_type: str, amount: float, rate: float,
+    #                         time_in_force: str, **kwargs) -> bool:
+    #     print('z', metadata["pair"], self.custom_stops[metadata["pair"]])                    
+    #     if self.custom_stops[metadata["pair"]] == False:
+    #         self.custom_stops[metadata["pair"]] = True
+    #         return True
+    #     else:
+    #         return False
 
-    def confirm_trade_exit(self, pair: str, trade, order_type: str, amount: float,
-                           rate: float, time_in_force: str, sell_reason: str, **kwargs) -> bool:
-        self.custom_stops[metadata["pair"]] = True
-        return True
+    # def confirm_trade_exit(self, pair: str, trade, order_type: str, amount: float,
+    #                        rate: float, time_in_force: str, sell_reason: str, **kwargs) -> bool:
+    #     self.custom_stops[metadata["pair"]] = True
+    #     return True
 
     def populate_sell_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
         """

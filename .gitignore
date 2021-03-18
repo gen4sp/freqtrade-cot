@@ -95,3 +95,4 @@ target/
 
 #exceptions
 !*.gitkeep
+user_data/hyperopt_results

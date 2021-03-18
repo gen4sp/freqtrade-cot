@@ -44,46 +44,28 @@ class AllPairs(IHyperOpt):
         """
         Define the buy strategy parameters to be used by Hyperopt.
         """
+        def compareFields(dt, fieldname, shift, ratio):
+            return dt[fieldname].shift(shift)/dt[fieldname] > ratio/1000
+
         def populate_buy_trend(dataframe: DataFrame, metadata: dict) -> DataFrame:
             """
-            Buy strategy Hyperopt will build and use.
+            Based on TA indicators, populates the buy signal for the given dataframe
+            :param dataframe: DataFrame populated with indicators
+            :param metadata: Additional information, like the currently traded pair
+            :return: DataFrame with buy column
             """
-            conditions = []
-
-            # GUARDS AND TRENDS
-            if params.get('mfi-enabled'):
-                conditions.append(dataframe['mfi'] < params['mfi-value'])
-            if params.get('fastd-enabled'):
-                conditions.append(dataframe['fastd'] < params['fastd-value'])
-            if params.get('adx-enabled'):
-                conditions.append(dataframe['adx'] > params['adx-value'])
-            if params.get('rsi-enabled'):
-                conditions.append(dataframe['rsi'] < params['rsi-value'])
-
-            # TRIGGERS
-            if 'trigger' in params:
-                if params['trigger'] == 'bb_lower':
-                    conditions.append(dataframe['close'] < dataframe['bb_lowerband'])
-                if params['trigger'] == 'macd_cross_signal':
-                    conditions.append(qtpylib.crossed_above(
-                        dataframe['macd'], dataframe['macdsignal']
-                    ))
-                if params['trigger'] == 'sar_reversal':
-                    conditions.append(qtpylib.crossed_above(
-                        dataframe['close'], dataframe['sar']
-                    ))
-
-            # Check that the candle had volume
-            conditions.append(dataframe['volume'] > 0)
-
-            if conditions:
-                dataframe.loc[
-                    reduce(lambda x, y: x & y, conditions),
-                    'buy'] = 1
-
+        
+            dataframe.loc[(
+                compareFields(dataframe, 'close', 1,  params['c-ratio']) &
+                compareFields(dataframe, 'close', 2, params['c-ratio']) &
+                compareFields(dataframe, 'volume', 1, params['v-ratio']) &
+                compareFields(dataframe, 'volume', 2, params['v-ratio']) &
+                (dataframe['volume'] > 0)),'buy'] = 1
             return dataframe
 
         return populate_buy_trend
+
+    
 
     @staticmethod
     def indicator_space() -> List[Dimension]:
@@ -91,78 +73,78 @@ class AllPairs(IHyperOpt):
         Define your Hyperopt space for searching buy strategy parameters.
         """
         return [
-            Integer(10, 25, name='mfi-value'),
-            Integer(15, 45, name='fastd-value'),
-            Integer(20, 50, name='adx-value'),
-            Integer(20, 40, name='rsi-value'),
-            Categorical([True, False], name='mfi-enabled'),
-            Categorical([True, False], name='fastd-enabled'),
-            Categorical([True, False], name='adx-enabled'),
-            Categorical([True, False], name='rsi-enabled'),
-            Categorical(['bb_lower', 'macd_cross_signal', 'sar_reversal'], name='trigger')
+            Integer(1, 2000, name='c-ratio'),
+            Integer(1, 2000, name='v-ratio'),
+            # Categorical([1.001, 1.01, 1.03, 1.07, 1.1, 1.24, 1.5], name='c-ratio'),
+            # Categorical([1.001, 1.01, 1.03, 1.07, 1.1, 1.24 1.5], name='v-ratio')
+            # Categorical([True, False], name='mfi-enabled'),
+            # Categorical([True, False], name='fastd-enabled'),
+            # Categorical([True, False], name='adx-enabled'),
+            # Categorical([True, False], name='rsi-enabled'),
+            # Categorical(['bb_lower', 'macd_cross_signal', 'sar_reversal'], name='trigger')
         ]
 
-    @staticmethod
-    def sell_strategy_generator(params: Dict[str, Any]) -> Callable:
-        """
-        Define the sell strategy parameters to be used by Hyperopt.
-        """
-        def populate_sell_trend(dataframe: DataFrame, metadata: dict) -> DataFrame:
-            """
-            Sell strategy Hyperopt will build and use.
-            """
-            conditions = []
+    # @staticmethod
+    # def sell_strategy_generator(params: Dict[str, Any]) -> Callable:
+    #     """
+    #     Define the sell strategy parameters to be used by Hyperopt.
+    #     """
+    #     def populate_sell_trend(dataframe: DataFrame, metadata: dict) -> DataFrame:
+    #         """
+    #         Sell strategy Hyperopt will build and use.
+    #         """
+    #         conditions = []
 
-            # GUARDS AND TRENDS
-            if params.get('sell-mfi-enabled'):
-                conditions.append(dataframe['mfi'] > params['sell-mfi-value'])
-            if params.get('sell-fastd-enabled'):
-                conditions.append(dataframe['fastd'] > params['sell-fastd-value'])
-            if params.get('sell-adx-enabled'):
-                conditions.append(dataframe['adx'] < params['sell-adx-value'])
-            if params.get('sell-rsi-enabled'):
-                conditions.append(dataframe['rsi'] > params['sell-rsi-value'])
+    #         # GUARDS AND TRENDS
+    #         if params.get('sell-mfi-enabled'):
+    #             conditions.append(dataframe['mfi'] > params['sell-mfi-value'])
+    #         if params.get('sell-fastd-enabled'):
+    #             conditions.append(dataframe['fastd'] > params['sell-fastd-value'])
+    #         if params.get('sell-adx-enabled'):
+    #             conditions.append(dataframe['adx'] < params['sell-adx-value'])
+    #         if params.get('sell-rsi-enabled'):
+    #             conditions.append(dataframe['rsi'] > params['sell-rsi-value'])
 
-            # TRIGGERS
-            if 'sell-trigger' in params:
-                if params['sell-trigger'] == 'sell-bb_upper':
-                    conditions.append(dataframe['close'] > dataframe['bb_upperband'])
-                if params['sell-trigger'] == 'sell-macd_cross_signal':
-                    conditions.append(qtpylib.crossed_above(
-                        dataframe['macdsignal'], dataframe['macd']
-                    ))
-                if params['sell-trigger'] == 'sell-sar_reversal':
-                    conditions.append(qtpylib.crossed_above(
-                        dataframe['sar'], dataframe['close']
-                    ))
+    #         # TRIGGERS
+    #         if 'sell-trigger' in params:
+    #             if params['sell-trigger'] == 'sell-bb_upper':
+    #                 conditions.append(dataframe['close'] > dataframe['bb_upperband'])
+    #             if params['sell-trigger'] == 'sell-macd_cross_signal':
+    #                 conditions.append(qtpylib.crossed_above(
+    #                     dataframe['macdsignal'], dataframe['macd']
+    #                 ))
+    #             if params['sell-trigger'] == 'sell-sar_reversal':
+    #                 conditions.append(qtpylib.crossed_above(
+    #                     dataframe['sar'], dataframe['close']
+    #                 ))
 
-            # Check that the candle had volume
-            conditions.append(dataframe['volume'] > 0)
+    #         # Check that the candle had volume
+    #         conditions.append(dataframe['volume'] > 0)
 
-            if conditions:
-                dataframe.loc[
-                    reduce(lambda x, y: x & y, conditions),
-                    'sell'] = 1
+    #         if conditions:
+    #             dataframe.loc[
+    #                 reduce(lambda x, y: x & y, conditions),
+    #                 'sell'] = 1
 
-            return dataframe
+    #         return dataframe
 
-        return populate_sell_trend
+    #     return populate_sell_trend
 
-    @staticmethod
-    def sell_indicator_space() -> List[Dimension]:
-        """
-        Define your Hyperopt space for searching sell strategy parameters.
-        """
-        return [
-            Integer(75, 100, name='sell-mfi-value'),
-            Integer(50, 100, name='sell-fastd-value'),
-            Integer(50, 100, name='sell-adx-value'),
-            Integer(60, 100, name='sell-rsi-value'),
-            Categorical([True, False], name='sell-mfi-enabled'),
-            Categorical([True, False], name='sell-fastd-enabled'),
-            Categorical([True, False], name='sell-adx-enabled'),
-            Categorical([True, False], name='sell-rsi-enabled'),
-            Categorical(['sell-bb_upper',
-                         'sell-macd_cross_signal',
-                         'sell-sar_reversal'], name='sell-trigger')
-        ]
+    # @staticmethod
+    # def sell_indicator_space() -> List[Dimension]:
+    #     """
+    #     Define your Hyperopt space for searching sell strategy parameters.
+    #     """
+    #     return [
+    #         Integer(75, 100, name='sell-mfi-value'),
+    #         Integer(50, 100, name='sell-fastd-value'),
+    #         Integer(50, 100, name='sell-adx-value'),
+    #         Integer(60, 100, name='sell-rsi-value'),
+    #         Categorical([True, False], name='sell-mfi-enabled'),
+    #         Categorical([True, False], name='sell-fastd-enabled'),
+    #         Categorical([True, False], name='sell-adx-enabled'),
+    #         Categorical([True, False], name='sell-rsi-enabled'),
+    #         Categorical(['sell-bb_upper',
+    #                      'sell-macd_cross_signal',
+    #                      'sell-sar_reversal'], name='sell-trigger')
+    #     ]
