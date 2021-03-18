@@ -44,23 +44,34 @@ class TenderEnter(IStrategy):
     #     "0":  0.08 # 8% imidietly
     # }
     minimal_roi = {
-        "180":  0.2, # 5% after 240 min
-        "200":  0.1,
-        "240":  0.00,
-        "0":  0.3 # 8% imidietly
+        "0": 0.21296,
+        "94": 0.13203,
+        "190": 0.04443,
+        "374": 0
     }
+    # minimal_roi = {
+    #     "180":  0.2, # 5% after 240 min
+    #     "200":  0.1,
+    #     "240":  0.00,
+    #     "0":  0.3 # 8% imidietly
+    # }
 
     # Optimal stoploss designed for the strategy.
     # This attribute will be overridden if the config file contains "stoploss".
-    stoploss = -0.4
+    # stoploss = -0.4
+    stoploss = -0.25933
 
     # Trailing stoploss
-    trailing_stop = True
-    trailing_stop_positive = 0.02
-    trailing_stop_positive_offset = 0.03
-    trailing_only_offset_is_reached = True
-    trailing_stop_positive = 0.02
+    # trailing_stop = True
+    # trailing_stop_positive = 0.02
+    # trailing_stop_positive_offset = 0.03
+    # trailing_only_offset_is_reached = True
+    # trailing_stop_positive = 0.02
     # trailing_stop_positive_offset = 0.0  # Disabled / not configured
+    trailing_stop = True
+    trailing_stop_positive = 0.25571
+    trailing_stop_positive_offset = 0.35142
+    trailing_only_offset_is_reached = True
 
     # Optimal timeframe for the strategy.
     timeframe = '15m'
@@ -368,15 +379,15 @@ class TenderEnter(IStrategy):
         """
     
         dataframe.loc[(
-            self.compareFields(dataframe, 'close', 1) &
-            self.compareFields(dataframe, 'close', 2) &
-            self.compareFields(dataframe, 'volume', 1) &
-            self.compareFields(dataframe, 'volume', 2) &
+            self.compareFields(dataframe, 'close', 1, 1017) &
+            self.compareFields(dataframe, 'close', 2, 1017) &
+            self.compareFields(dataframe, 'volume', 1, 65) &
+            self.compareFields(dataframe, 'volume', 2, 65) &
             (dataframe['volume'] > 0)),'buy'] = 1
         return dataframe
 
     def compareFields(self, dt, fieldname, shift, ratio=1.034):
-        return dt[fieldname].shift(shift)/dt[fieldname] > ratio
+        return dt[fieldname].shift(shift)/dt[fieldname] > ratio/1000
 
     # def calcAngle(self, p1, p2, delta_x) -> bool:
     #     delta_y = p2 - p1
