@@ -38,14 +38,33 @@ class AllPairs(IHyperOpt):
     or is available online under the following URL:
     https://github.com/freqtrade/freqtrade/blob/develop/freqtrade/templates/sample_hyperopt_advanced.py.
     """
+    stoploss = -0.12
+    trailing_stop = True
+    trailing_stop_positive = 0.051
+    trailing_stop_positive_offset = 0.13
+    trailing_only_offset_is_reached = False
 
+    minimal_roi = {
+        "0": 0.21,
+        "90": 0.14,
+        "120": 0.05,
+        "360": 0
+    }
     @staticmethod
     def buy_strategy_generator(params: Dict[str, Any]) -> Callable:
         """
         Define the buy strategy parameters to be used by Hyperopt.
         """
-        def compareFields(dt, fieldname, shift, ratio):
-            return dt[fieldname].shift(shift)/dt[fieldname] > ratio/1000
+        def compareFields(dt, fieldname, size, ratio, w):
+            res = 0
+            for shift in range(1, size+1):
+                base_candle = dt[fieldname].shift(shift-1) 
+                trg_candle = dt[fieldname].shift(shift)
+                aspect = trg_candle/base_candle
+                res += aspect
+            res = res/size    
+            weight_k = 1 - (w/100)
+            return res*(w/100) >= (ratio/1000)
 
         def populate_buy_trend(dataframe: DataFrame, metadata: dict) -> DataFrame:
             """
@@ -56,10 +75,10 @@ class AllPairs(IHyperOpt):
             """
         
             dataframe.loc[(
-                compareFields(dataframe, 'close', 1,  params['c-ratio']) &
-                compareFields(dataframe, 'close', 2, params['c-ratio']) &
-                compareFields(dataframe, 'volume', 1, params['v-ratio']) &
-                compareFields(dataframe, 'volume', 2, params['v-ratio']) &
+                compareFields(dataframe, 'close', 1,  params['c-ratio1'], params['c-weight']) &
+                compareFields(dataframe, 'close', params['c-size'], params['c-ratio2'], params['c-weight2']) &
+                compareFields(dataframe, 'volume', 1, params['v-ratio1'], params['v-weight']) &
+                compareFields(dataframe, 'volume', params['v-size'], params['v-ratio2'], params['v-weight2']) &
                 (dataframe['volume'] > 0)),'buy'] = 1
             return dataframe
 
@@ -73,11 +92,19 @@ class AllPairs(IHyperOpt):
         Define your Hyperopt space for searching buy strategy parameters.
         """
         return [
-            Integer(1, 2000, name='c-ratio'),
-            Integer(1, 2000, name='v-ratio'),
-            # Categorical([1.001, 1.01, 1.03, 1.07, 1.1, 1.24, 1.5], name='c-ratio'),
-            # Categorical([1.001, 1.01, 1.03, 1.07, 1.1, 1.24 1.5], name='v-ratio')
-            # Categorical([True, False], name='mfi-enabled'),
+            Integer(1, 1000, name='c-ratio1'),
+            Integer(1, 1000, name='c-ratio2'),
+            Integer(0, 200, name='c-weight'),
+            Integer(0, 200, name='c-weight2'),
+            Categorical([2, 3,4,5,6], name='c-size'),
+            
+            Integer(1, 100, name='v-ratio1'),
+            Integer(1, 1000, name='v-ratio2'),
+            Integer(0, 200, name='v-weight'),
+            Integer(0, 200, name='v-weight2'),
+            Categorical([2, 3,4,5,6], name='v-size'),
+            
+            # Categorical([True, False], name='prevent-shift-base'),
             # Categorical([True, False], name='fastd-enabled'),
             # Categorical([True, False], name='adx-enabled'),
             # Categorical([True, False], name='rsi-enabled'),
