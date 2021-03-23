@@ -74,17 +74,24 @@ class TenderEnter(IStrategy):
     # trailing_stop_positive_offset = 0.13
     # trailing_only_offset_is_reached = False
 
-    stoploss = -0.12
+    # stoploss = -0.12
+    stoploss = -0.31
     trailing_stop = True
-    trailing_stop_positive = 0.02
-    trailing_stop_positive_offset = 0.06
+    trailing_stop_positive = 0.01
+    trailing_stop_positive_offset = 0.022
     trailing_only_offset_is_reached = True
 
-    minimal_roi = {
-        "0": 0.08,
-        "90": 0.06,
-        "120": 0.02,
-        "360": 0
+    # minimal_roi = {
+    #     "0": 0.08,
+    #     "90": 0.06,
+    #     "120": 0.02,
+    #     "360": 0
+    # }
+       minimal_roi = {
+        "0": 0.34154,
+        "53": 0.07596,
+        "224": 0.02112,
+        "382": 0
     }
 
     # Optimal timeframe for the strategy.
