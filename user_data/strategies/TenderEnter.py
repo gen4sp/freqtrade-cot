@@ -87,7 +87,7 @@ class TenderEnter(IStrategy):
     #     "120": 0.02,
     #     "360": 0
     # }
-       minimal_roi = {
+    minimal_roi = {
         "0": 0.34154,
         "53": 0.07596,
         "224": 0.02112,
