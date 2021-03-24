@@ -258,7 +258,7 @@
             "DEGO/USDT",
             "ALICE/USDT"
         ],
-        "skip_pair_validation": true,
+        "skip_pair_validation": false,
         "pair_blacklist": ["BNB/BTC"]
     },
     "pairlists": [
