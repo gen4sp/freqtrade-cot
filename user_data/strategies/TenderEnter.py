@@ -108,7 +108,7 @@ class TenderEnter(IStrategy):
     ignore_roi_if_buy_signal = False
 
     # Number of candles the strategy requires before producing valid signals
-    startup_candle_count: int = 102
+    startup_candle_count: int = 5
     
     
     # Optional order type mapping.
