@@ -75,10 +75,10 @@ class TenderEnter(IStrategy):
     # trailing_only_offset_is_reached = False
 
     # stoploss = -0.12
-    stoploss = -0.31
+    stoploss = -0.1
     trailing_stop = True
-    trailing_stop_positive = 0.01
-    trailing_stop_positive_offset = 0.022
+    trailing_stop_positive = 0.03
+    trailing_stop_positive_offset = 0.05
     trailing_only_offset_is_reached = True
 
     # minimal_roi = {
@@ -88,15 +88,17 @@ class TenderEnter(IStrategy):
     #     "360": 0
     # }
     minimal_roi = {
-        "0": 0.34154,
-        "53": 0.07596,
-        "224": 0.02112,
-        "382": 0
+        "0": 0.34,
+        "10": 0.29,
+        "40": 0.19,
+        "55": 0.9,
+        "224": 0.02,
+        "380": 0
     }
 
     # Optimal timeframe for the strategy.
-    timeframe = '15m'
-    inf_tf = '15m' #timeframe of second line
+    timeframe = '5m'
+    inf_tf = '5m' #timeframe of second line
 
 
     # Run "populate_indicators()" only for new candle.
