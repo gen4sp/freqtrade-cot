@@ -97,8 +97,8 @@ class TenderEnter(IStrategy):
     }
 
     # Optimal timeframe for the strategy.
-    timeframe = '5m'
-    inf_tf = '5m' #timeframe of second line
+    timeframe = '15m'
+    inf_tf = '15m' #timeframe of second line
 
 
     # Run "populate_indicators()" only for new candle.
@@ -161,20 +161,30 @@ class TenderEnter(IStrategy):
         """
     
         dataframe.loc[(
-            self.compareFields(dataframe, 'close', 1, 741, 68) &
-            self.compareFields(dataframe, 'close', 5, 94, 103) &
-            self.compareFields(dataframe, 'volume', 1, 52, 22) &
-            self.compareFields(dataframe, 'volume', 5, 45, 157) &
+            self.compareFields(dataframe, 'close', 4, 1.12199, 0.5977) &
+            self.compareFields(dataframe, 'volume', 4, 1.76559, 0.5977) &
             (dataframe['volume'] > 0)),'buy'] = 1
         return dataframe
 
-    def compareFields(self, dt, fieldname, shift, ratio, w):
-            shift2 = 0 if False else (shift-1)
-            base_candle = dt[fieldname].shift(shift2) 
-            trg_candle = dt[fieldname].shift(shift)
-            aspect = trg_candle/base_candle
-            weight_k = 1 - (w/100)
-            return aspect*(w/100) >= (ratio/1000)
+    def compareFields(self, dt, fieldname, size, ratio, r2):
+            res = dt[fieldname] * 0
+            points = 0
+            for shift in range(2, size+1):
+                base_candle = dt[fieldname].shift(shift-1) 
+                trg_candle = dt[fieldname].shift(shift)
+                aspect = base_candle/trg_candle
+                score = aspect.where(aspect > ratio, 1)
+                score = score.mask(score > ratio, 0)
+                # score = 1 if aspect > ratio else 0
+                res = res + score
+                # w = hmult * (shift_inv/size)
+                # res += aspect * w
+                # total_w += w
+            # res = res/total_w    
+            # return res >= (ratio/10)
+            currentUp = (dt[fieldname]/dt[fieldname].shift(1))  >  ratio
+            fin = (res / size) > r2
+            return fin & currentUp
 
     # def calcAngle(self, p1, p2, delta_x) -> bool:
     #     delta_y = p2 - p1

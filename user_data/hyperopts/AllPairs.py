@@ -44,20 +44,25 @@ class AllPairs(IHyperOpt):
         """
         Define the buy strategy parameters to be used by Hyperopt.
         """
-        def compareFields(dt, fieldname, size, ratio, hmult):
-            res = 0
-            total_w = 0
-            
-            for shift in range(1, size+1):
-                shift_inv = size - shift + 1
+        def compareFields(dt, fieldname, size, ratio, r2):
+            res = dt[fieldname] * 0
+            points = 0
+            for shift in range(2, size+1):
                 base_candle = dt[fieldname].shift(shift-1) 
                 trg_candle = dt[fieldname].shift(shift)
-                aspect = trg_candle/base_candle
-                w = hmult * (shift_inv/size)
-                res += aspect * w
-                total_w += w
-            res = res/total_w    
-            return res >= (ratio/10)
+                aspect = base_candle/trg_candle
+                score = aspect.where(aspect > ratio, 1)
+                score = score.mask(score > ratio, 0)
+                # score = 1 if aspect > ratio else 0
+                res = res + score
+                # w = hmult * (shift_inv/size)
+                # res += aspect * w
+                # total_w += w
+            # res = res/total_w    
+            # return res >= (ratio/10)
+            currentUp = (dt[fieldname]/dt[fieldname].shift(1))  >  ratio
+            fin = (res / size) > r2
+            return fin & currentUp
 
         def populate_buy_trend(dataframe: DataFrame, metadata: dict) -> DataFrame:
             """
@@ -68,10 +73,8 @@ class AllPairs(IHyperOpt):
             """
         
             dataframe.loc[(
-                compareFields(dataframe, 'close', params['c-size-1'],  params['c-ratio-1'], params['c-hmult-1']) &
-                compareFields(dataframe, 'close', params['c-size-2'], params['c-ratio-2'], params['c-hmult-2']) &
-                compareFields(dataframe, 'volume', params['v-size-1'],  params['v-ratio-1'], params['v-hmult-1']) &
-                compareFields(dataframe, 'volume', params['v-size-2'],  params['v-ratio-2'], params['v-hmult-2']) &
+                compareFields(dataframe, 'close', params['c-size-1'],  params['c-ratio-1'],  params['r2']) &
+                compareFields(dataframe, 'volume', params['c-size-1'],  params['v-ratio-1'],  params['r2']) &
                 (dataframe['volume'] > 0)),'buy'] = 1
             return dataframe
 
@@ -85,23 +88,25 @@ class AllPairs(IHyperOpt):
         Define your Hyperopt space for searching buy strategy parameters.
         """
         return [
-            Integer(1, 50, name='c-ratio-1'),
-            Integer(1, 50, name='c-ratio-2'),
+            Real(1, 3, name='c-ratio-1'),
+            # Real(1, 3, name='c-ratio-2'),
             # Integer(0, 200, name='c-weight-1'),
             # Integer(0, 200, name='c-weight-2'),
-            Categorical([2, 3,4,5,6], name='c-size-1'),
-            Categorical([2, 3,4,5,6], name='c-size-2'),
-            Categorical([1, 1.2,1.5,2,4], name='c-hmult-1'),
-            Categorical([1, 1.2,1.5,2,4], name='c-hmult-2'),
+            Integer(3,6, name='c-size-1'),
+            # Integer(3,6, name='c-size-2'),
+            # Categorical([1, 1.2,1.5,2,4], name='c-hmult-1'),
+            # Categorical([1, 1.2,1.5,2,4], name='c-hmult-2'),
             
-            Integer(1, 50, name='v-ratio-1'),
-            Integer(1, 50, name='v-ratio-2'),
+            Real(1, 3, name='v-ratio-1'),
+            # Real(1, 3, name='v-ratio-2'),
+
+            Real(0, 1, name='r2'),
             # Integer(0, 200, name='v-weight-1'),
             # Integer(0, 200, name='v-weight-2'),
-            Categorical([2, 3,4,5,6], name='v-size-1'),
-            Categorical([2, 3,4,5,6], name='v-size-2'),
-            Categorical([1, 1.2,1.5,2,4], name='v-hmult-1'),
-            Categorical([1, 1.2,1.5,2,4], name='v-hmult-2'),
+            # Categorical([2, 3,4,5,6,8,12], name='v-size-1'),
+            # Categorical([2, 3,4,5,6,8,12], name='v-size-2'),
+            # Categorical([1, 1.2,1.5,2,4], name='v-hmult-1'),
+            # Categorical([1, 1.2,1.5,2,4], name='v-hmult-2'),
             
             # Categorical([True, False], name='prevent-shift-base'),
             # Categorical([True, False], name='fastd-enabled'),
