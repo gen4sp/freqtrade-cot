@@ -44,10 +44,10 @@ class TenderEnter(IStrategy):
     #     "0":  0.08 # 8% imidietly
     # }
     minimal_roi = {
-        "0": 0.21296,
-        "94": 0.13203,
-        "190": 0.04443,
-        "374": 0
+        "0": 0.14628,
+        "112": 0.12011,
+        "289": 0.0573,
+        "570": 0
     }
     # minimal_roi = {
     #     "180":  0.2, # 5% after 240 min
@@ -59,18 +59,13 @@ class TenderEnter(IStrategy):
     # Optimal stoploss designed for the strategy.
     # This attribute will be overridden if the config file contains "stoploss".
     # stoploss = -0.4
-    stoploss = -0.25933
+    # Stoploss:
+    stoploss = -0.0256
 
-    # Trailing stoploss
-    # trailing_stop = True
-    # trailing_stop_positive = 0.02
-    # trailing_stop_positive_offset = 0.03
-    # trailing_only_offset_is_reached = True
-    # trailing_stop_positive = 0.02
-    # trailing_stop_positive_offset = 0.0  # Disabled / not configured
+    # Trailing stop:
     trailing_stop = True
-    trailing_stop_positive = 0.25571
-    trailing_stop_positive_offset = 0.35142
+    trailing_stop_positive = 0.33553
+    trailing_stop_positive_offset = 0.39859
     trailing_only_offset_is_reached = True
 
     # Optimal timeframe for the strategy.
