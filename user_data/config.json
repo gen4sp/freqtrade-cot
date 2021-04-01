@@ -1,7 +1,7 @@
 {
     "max_open_trades": 100,
     "stake_currency": "USDT",
-    "stake_amount": 1000,
+    "stake_amount": 100,
     "tradable_balance_ratio": 0.90,
     "fiat_display_currency": "USD",
     "timeframe": "15m",
