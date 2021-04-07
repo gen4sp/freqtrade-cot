@@ -200,7 +200,7 @@ class Dummy(IStrategy):
     
         dataframe.loc[(
             # dataframe['pump'] &
-            (dataframe['volume'] > 0)),'buy'] = 1
+            (dataframe['volume'] > 0)),'buy'] = 0
         return dataframe
 
     

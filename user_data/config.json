@@ -5,7 +5,7 @@
     "tradable_balance_ratio": 0.90,
     "fiat_display_currency": "USD",
     "timeframe": "5m",
-    "dry_run": false,
+    "dry_run": true,
     "dry_run_wallet": 10000,
     "cancel_open_orders_on_exit": false,
     "unfilledtimeout": {
@@ -286,7 +286,7 @@
     },
     "api_server": {
         "enabled": true,
-        "listen_ip_address": "0.0.0.0",
+        "listen_ip_address": "127.0.0.1 ",
         "listen_port": 8080,
         "verbosity": "info",
         "jwt_secret_key": "aopaoap",
