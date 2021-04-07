@@ -52,7 +52,7 @@ class TenderEnter(IStrategy):
     }
 
     # Stoploss:
-    stoploss = -0.28872
+    stoploss = -0.05
 
     # Trailing stop:
     trailing_stop = True
@@ -389,37 +389,27 @@ class TenderEnter(IStrategy):
         """
         params = {
             'c-ratio': 0.37954,
-            'c-ratio2': 0.21258,
-            'c-ratio3': -0.56964,
-            'c-ratio4': -0.60064,
-            'c-ratio5': -0.91718,
-            'c-ratio6': -0.74478,
+            'c-k': 0.1,
             'v-ratio': 1.94154,
-            'v-ratio2': -1.27319,
-            'v-ratio3': -0.38369,
-            'v-ratio4': 1.93743,
-            'v-ratio5': -1.84449,
-            'v-ratio6': -1.18191
+            'v-k': 0.5,
+            'avg-ratio': 5
         }
     
         dataframe.loc[(
             self.compareFields(dataframe, 'close', 1, params['c-ratio']) &
-            self.compareFields(dataframe, 'close', 2, params['c-ratio2']) &
-            self.compareFields(dataframe, 'close', 3, params['c-ratio3']) &
-            self.compareFields(dataframe, 'close', 4, params['c-ratio4']) &
-            self.compareFields(dataframe, 'close', 5, params['c-ratio5']) &
-            self.compareFields(dataframe, 'close', 6, params['c-ratio6']) &
+            self.compareFields(dataframe, 'close', 2, params['c-ratio'] + params['c-k']) &
+            self.compareFields(dataframe, 'close', 3, params['c-ratio'] + params['c-k']*2) &
+
             self.compareFields(dataframe, 'volume', 1, params['v-ratio']) &
-            self.compareFields(dataframe, 'volume', 2, params['v-ratio2']) &
-            self.compareFields(dataframe, 'volume', 3, params['v-ratio3']) &
-            self.compareFields(dataframe, 'volume', 4, params['v-ratio4']) &
-            self.compareFields(dataframe, 'volume', 5, params['v-ratio5']) &
-            self.compareFields(dataframe, 'volume', 6, params['v-ratio6']) &
+            self.compareFields(dataframe, 'volume', 2, params['v-ratio'] + params['v-k']) &
+            self.compareFields(dataframe, 'volume', 3, params['v-ratio'] + params['v-k']) &
+
+            self.compareFields(dataframe, 'ema50', 1, params['v-ratio']) &
             (dataframe['volume'] > 0)),'buy'] = 1
         return dataframe
 
     def compareFields(self, dt, fieldname, shift, ratio=1.034):
-        return dt[fieldname]/dt[fieldname].shift(shift) > ratio
+        return dt[fieldname].shift(shift-1)/dt[fieldname].shift(shift) > ratio
 
     # def calcAngle(self, p1, p2, delta_x) -> bool:
     #     delta_y = p2 - p1

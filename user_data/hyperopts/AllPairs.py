@@ -44,8 +44,8 @@ class AllPairs(IHyperOpt):
         """
         Define the buy strategy parameters to be used by Hyperopt.
         """
-        def compareFields(dt, fieldname, shift, ratio):
-            return dt[fieldname]/dt[fieldname].shift(shift) > ratio
+        def compareFields(dt, fieldname, shift):
+            return dt[fieldname].shift(shift-1)/dt[fieldname].shift(shift)
 
         def populate_buy_trend(dataframe: DataFrame, metadata: dict) -> DataFrame:
             """
@@ -56,18 +56,13 @@ class AllPairs(IHyperOpt):
             """
         
             dataframe.loc[(
-                compareFields(dataframe, 'close', 1, params['c-ratio']) &
-                compareFields(dataframe, 'close', 2, params['c-ratio2']) &
-                compareFields(dataframe, 'close', 3, params['c-ratio3']) &
-                compareFields(dataframe, 'close', 4, params['c-ratio4']) &
-                compareFields(dataframe, 'close', 5, params['c-ratio5']) &
-                compareFields(dataframe, 'close', 6, params['c-ratio6']) &
-                compareFields(dataframe, 'volume', 1, params['v-ratio']) &
-                compareFields(dataframe, 'volume', 2, params['v-ratio2']) &
-                compareFields(dataframe, 'volume', 3, params['v-ratio3']) &
-                compareFields(dataframe, 'volume', 4, params['v-ratio4']) &
-                compareFields(dataframe, 'volume', 5, params['v-ratio5']) &
-                compareFields(dataframe, 'volume', 6, params['v-ratio6']) &
+                
+                (compareFields(dataframe, 'close', 1) - compareFields(dataframe, 'close', 2) > params['c-r']/100) &
+                (compareFields(dataframe, 'close', 2) > compareFields(dataframe, 'close', 3)) &
+                (compareFields(dataframe, 'volume', 1) - compareFields(dataframe, 'volume', 2) > params['v-r']) &
+                (compareFields(dataframe, 'volume', 2) > compareFields(dataframe, 'volume', 3)) &
+                # (compareFields(dataframe, params['avg'], 1) - compareFields(dataframe, params['avg'], 2) > params['e-r']) &
+                # (compareFields(dataframe, params['avg'], 2) > compareFields(dataframe, params['avg'], 3)) &
                 (dataframe['volume'] > 0)),'buy'] = 1
             return dataframe
 
@@ -81,24 +76,16 @@ class AllPairs(IHyperOpt):
         Define your Hyperopt space for searching buy strategy parameters.
         """
         return [
-            Real(-2, 2, name='c-ratio'),
-            Real(-2, 2, name='c-ratio2'),
-            Real(-2, 2, name='c-ratio3'),
-            Real(-2, 2, name='c-ratio4'),
-            Real(-2, 2, name='c-ratio5'),
-            Real(-2, 2, name='c-ratio6'),
-            Real(-2, 2, name='v-ratio'),
-            Real(-2, 2, name='v-ratio2'),
-            Real(-2, 2, name='v-ratio3'),
-            Real(-2, 2, name='v-ratio4'),
-            Real(-2, 2, name='v-ratio5'),
-            Real(-2, 2, name='v-ratio6'),
+            Real(0, 2, name='c-r'),
+            Real(0, 2, name='v-r'),
+            # Real(0, 2, name='e-ы'),
+            # Real(-2, 2, name='a-r'),
             # Categorical([1.001, 1.01, 1.03, 1.07, 1.1, 1.24, 1.5], name='c-ratio'),
             # Categorical([1.001, 1.01, 1.03, 1.07, 1.1, 1.24 1.5], name='v-ratio')
             # Categorical([True, False], name='mfi-enabled'),
             # Categorical([True, False], name='fastd-enabled'),
             # Categorical([True, False], name='adx-enabled'),
-            # Categorical([True, False], name='rsi-enabled'),
+            # Categorical(['ema10', 'ema5', 'tema'], name='avg'),
             # Categorical(['bb_lower', 'macd_cross_signal', 'sar_reversal'], name='trigger')
         ]
 
