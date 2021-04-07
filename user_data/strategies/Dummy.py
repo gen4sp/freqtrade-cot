@@ -177,9 +177,9 @@ class Dummy(IStrategy):
 
         # ADX
         # dataframe['adx'] = ta.ADX(dataframe)
-        sym = metadata['pair'].split('/')[0]
-        data = [True if (item['symbols'] and sym in item['symbols']) else False for item in timeline] 
-        dataframe['pump'] = pd.DataFrame(data) 
+        # sym = metadata['pair'].split('/')[0]
+        # data = [True if (item['symbols'] and sym in item['symbols']) else False for item in timeline] 
+        # dataframe['pump'] = pd.DataFrame(data) 
         
         return dataframe
 
@@ -199,7 +199,7 @@ class Dummy(IStrategy):
         # }
     
         dataframe.loc[(
-            dataframe['pump'] &
+            # dataframe['pump'] &
             (dataframe['volume'] > 0)),'buy'] = 1
         return dataframe
 
