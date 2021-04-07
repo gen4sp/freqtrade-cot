@@ -1,12 +1,12 @@
 {
     "max_open_trades": 100,
     "stake_currency": "USDT",
-    "stake_amount": 100,
+    "stake_amount": 1000,
     "tradable_balance_ratio": 0.90,
     "fiat_display_currency": "USD",
-    "timeframe": "15m",
+    "timeframe": "5m",
     "dry_run": false,
-    "dry_run_wallet": 1000,
+    "dry_run_wallet": 10000,
     "cancel_open_orders_on_exit": false,
     "unfilledtimeout": {
         "buy": 10,
@@ -296,8 +296,9 @@
     },
     "bot_name": "freqtrade",
     "initial_state": "running",
-    "forcebuy_enable": false,
+    "forcebuy_enable": true,
     "internals": {
         "process_throttle_secs": 5
-    }
+    },
+    
 }

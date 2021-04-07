@@ -26,3 +26,5 @@ services:
       --db-url sqlite:////freqtrade/user_data/tradesv3.sqlite
       --config /freqtrade/user_data/config.json
       --strategy SampleStrategy
+    ports:
+       - "127.0.0.1:8080:8080"
