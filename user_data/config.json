@@ -281,8 +281,8 @@
     },
     "telegram": {
         "enabled": true,
-        "token": "1742962540:AAHar01-PQrmhCO5nQbZHggtH-Vxtq94vBI",
-        "chat_id": "606394"
+        "token": "1562614708:AAGEw2vfoK6OES4J2W8PVkC_4uY3LcAlsxU",
+        "chat_id": "-490837746"
     },
     "api_server": {
         "enabled": false,
