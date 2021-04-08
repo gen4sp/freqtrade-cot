@@ -74,8 +74,8 @@ class AllPairs(IHyperOpt):
         Define your Hyperopt space for searching buy strategy parameters.
         """
         return [
-            Real(1, 1.1, name='k1'),
-            Real(-1.1, -1, name='k2'),
+            Real(0.9, 1.1, name='k1'),
+            Real(0.9, 1.1, name='k2'),
             # Real(0, 2, name='e-ы'),
             # Real(-2, 2, name='a-r'),
             # Categorical([1.001, 1.01, 1.03, 1.07, 1.1, 1.24, 1.5], name='c-ratio'),

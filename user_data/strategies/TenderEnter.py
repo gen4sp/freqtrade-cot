@@ -54,9 +54,15 @@ class TenderEnter(IStrategy):
     # Stoploss:
     stoploss = -0.2
 
+    params = {
+     'k1': 1.01566, 'k2': 1.07197
+    }
+
     # Trailing stop:
     trailing_stop = True
-    trailing_stop_positive = 0.05
+    trailing_stop_positive = 0.01298
+    trailing_stop_positive_offset = 0.1008
+    trailing_only_offset_is_reached = False
     # trailing_stop_positive_offset = 0.21178
     # trailing_only_offset_is_reached = False
     # minimal_roi = {
@@ -182,83 +188,6 @@ class TenderEnter(IStrategy):
 
         # TEMA - Triple Exponential Moving Average
         dataframe['tema'] = ta.TEMA(dataframe, timeperiod=9)
-
-        # Cycle Indicator
-        # ------------------------------------
-        # Hilbert Transform Indicator - SineWave
-        # hilbert = ta.HT_SINE(dataframe)
-        # dataframe['htsine'] = hilbert['sine']
-        # dataframe['htleadsine'] = hilbert['leadsine']
-
-        # Pattern Recognition - Bullish candlestick patterns
-        # ------------------------------------
-        # # Hammer: values [0, 100]
-        # dataframe['CDLHAMMER'] = ta.CDLHAMMER(dataframe)
-        # # Inverted Hammer: values [0, 100]
-        # dataframe['CDLINVERTEDHAMMER'] = ta.CDLINVERTEDHAMMER(dataframe)
-        # # Dragonfly Doji: values [0, 100]
-        # dataframe['CDLDRAGONFLYDOJI'] = ta.CDLDRAGONFLYDOJI(dataframe)
-        # # Piercing Line: values [0, 100]
-        # dataframe['CDLPIERCING'] = ta.CDLPIERCING(dataframe) # values [0, 100]
-        # # Morningstar: values [0, 100]
-        # dataframe['CDLMORNINGSTAR'] = ta.CDLMORNINGSTAR(dataframe) # values [0, 100]
-        # # Three White Soldiers: values [0, 100]
-        # dataframe['CDL3WHITESOLDIERS'] = ta.CDL3WHITESOLDIERS(dataframe) # values [0, 100]
-
-        # Pattern Recognition - Bearish candlestick patterns
-        # ------------------------------------
-        # # Hanging Man: values [0, 100]
-        # dataframe['CDLHANGINGMAN'] = ta.CDLHANGINGMAN(dataframe)
-        # # Shooting Star: values [0, 100]
-        # dataframe['CDLSHOOTINGSTAR'] = ta.CDLSHOOTINGSTAR(dataframe)
-        # # Gravestone Doji: values [0, 100]
-        # dataframe['CDLGRAVESTONEDOJI'] = ta.CDLGRAVESTONEDOJI(dataframe)
-        # # Dark Cloud Cover: values [0, 100]
-        # dataframe['CDLDARKCLOUDCOVER'] = ta.CDLDARKCLOUDCOVER(dataframe)
-        # # Evening Doji Star: values [0, 100]
-        # dataframe['CDLEVENINGDOJISTAR'] = ta.CDLEVENINGDOJISTAR(dataframe)
-        # # Evening Star: values [0, 100]
-        # dataframe['CDLEVENINGSTAR'] = ta.CDLEVENINGSTAR(dataframe)
-
-        # Pattern Recognition - Bullish/Bearish candlestick patterns
-        # ------------------------------------
-        # # Three Line Strike: values [0, -100, 100]
-        # dataframe['CDL3LINESTRIKE'] = ta.CDL3LINESTRIKE(dataframe)
-        # # Spinning Top: values [0, -100, 100]
-        # dataframe['CDLSPINNINGTOP'] = ta.CDLSPINNINGTOP(dataframe) # values [0, -100, 100]
-        # # Engulfing: values [0, -100, 100]
-        # dataframe['CDLENGULFING'] = ta.CDLENGULFING(dataframe) # values [0, -100, 100]
-        # # Harami: values [0, -100, 100]
-        # dataframe['CDLHARAMI'] = ta.CDLHARAMI(dataframe) # values [0, -100, 100]
-        # # Three Outside Up/Down: values [0, -100, 100]
-        # dataframe['CDL3OUTSIDE'] = ta.CDL3OUTSIDE(dataframe) # values [0, -100, 100]
-        # # Three Inside Up/Down: values [0, -100, 100]
-        # dataframe['CDL3INSIDE'] = ta.CDL3INSIDE(dataframe) # values [0, -100, 100]
-
-        # # Chart type
-        # # ------------------------------------
-        # # Heikin Ashi Strategy
-        # heikinashi = qtpylib.heikinashi(dataframe)
-        # dataframe['ha_open'] = heikinashi['open']
-        # dataframe['ha_close'] = heikinashi['close']
-        # dataframe['ha_high'] = heikinashi['high']
-        # dataframe['ha_low'] = heikinashi['low']
-
-        # Retrieve best bid and best ask from the orderbook
-        # ------------------------------------
-        
-     
-
-        
-        # informative = self.dp.get_pair_dataframe(pair=metadata['pair'], timeframe="15m")
-        # dataframe["date"] = df["open_date"] + df["Delta"].map(pd.Timedelta.to_pytimedelta)
-        # dataframe = merge_informative_pair(dataframe, informative, self.timeframe, "15m", ffill=True)
-        
-        # informative = self.dp.get_pair_dataframe(metadata['pair'], inf_tf)
-        # informative = self.dp.get_pair_dataframe(pair=metadata['pair'], timeframe=self.inf_tf)
-        # informative = self.dp.get_pair_dataframe(pair=f"{self.stake_currency}/USDT", timeframe=self.inf_tf)
-        # dataframe = merge_informative_pair(dataframe, informative, self.timeframe, inf_tf, True)
-        # dataframe = merge_informative_pair(dataframe, informative, self.timeframe, self.inf_tf, ffill=True)
         return dataframe
 
     def populate_buy_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
@@ -268,11 +197,7 @@ class TenderEnter(IStrategy):
         :param metadata: Additional information, like the currently traded pair
         :return: DataFrame with buy column
         """
-        k=1.06
-        params = {
-            'avg-ratio': 1.001,
-            'avg-ratio2': -1.003
-                   }
+        
     
         dataframe.loc[(
             # self.compareFields(dataframe, 'close', 1, params['c-ratio']) &
@@ -282,8 +207,8 @@ class TenderEnter(IStrategy):
             # self.compareFields(dataframe, 'volume', 1, params['v-ratio']) &
             # self.compareFields(dataframe, 'volume', 2, params['v-ratio']) &
             # self.compareFields(dataframe, 'volume', 3, params['v-ratio']) &
-            self.compareFields(dataframe, 'tema', 1, params['avg-ratio']) &
-            self.compareFieldsRev(dataframe, 'ema50', 3, params['avg-ratio']) &
+            self.compareFields(dataframe, 'tema', 1, self.params['k1']) &
+            self.compareFieldsRev(dataframe, 'ema50', 3, self.params['k2']) &
             (dataframe['volume'] > 0)),'buy'] = 1
         return dataframe
 
