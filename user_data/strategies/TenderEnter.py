@@ -45,20 +45,20 @@ class TenderEnter(IStrategy):
     # }
     # ROI table:
     minimal_roi = {
-        "0": 0.25389,
-        "114": 0.07009,
-        "249": 0.0198,
-        "512": 0
+        # "0": 0.25389,
+        # "114": 0.07009,
+        # "249": 0.0198,
+        "0": 100
     }
 
     # Stoploss:
-    stoploss = -0.05
+    stoploss = -0.2
 
     # Trailing stop:
     trailing_stop = True
-    trailing_stop_positive = 0.14488
-    trailing_stop_positive_offset = 0.21178
-    trailing_only_offset_is_reached = False
+    trailing_stop_positive = 0.05
+    # trailing_stop_positive_offset = 0.21178
+    # trailing_only_offset_is_reached = False
     # minimal_roi = {
     #     "180":  0.2, # 5% after 240 min
     #     "200":  0.1,
@@ -84,8 +84,8 @@ class TenderEnter(IStrategy):
     # trailing_only_offset_is_reached = True
 
     # Optimal timeframe for the strategy.
-    timeframe = '15m'
-    inf_tf = '15m' #timeframe of second line
+    timeframe = '5m'
+    inf_tf = '5m' #timeframe of second line
 
 
     # Run "populate_indicators()" only for new candle.
@@ -97,7 +97,7 @@ class TenderEnter(IStrategy):
     ignore_roi_if_buy_signal = True
 
     # Number of candles the strategy requires before producing valid signals
-    startup_candle_count: int = 102
+    startup_candle_count: int = 50
     
     
     # Optional order type mapping.
@@ -283,9 +283,9 @@ class TenderEnter(IStrategy):
         # # EMA - Exponential Moving Average
         # dataframe['ema3'] = ta.EMA(dataframe, timeperiod=3)
         # dataframe['ema5'] = ta.EMA(dataframe, timeperiod=5)
-        # dataframe['ema10'] = ta.EMA(dataframe, timeperiod=10)
+        dataframe['ema10'] = ta.EMA(dataframe, timeperiod=10)
         # dataframe['ema21'] = ta.EMA(dataframe, timeperiod=21)
-        # dataframe['ema50'] = ta.EMA(dataframe, timeperiod=50)
+        dataframe['ema50'] = ta.EMA(dataframe, timeperiod=50)
         # dataframe['ema100'] = ta.EMA(dataframe, timeperiod=100)
 
         # # SMA - Simple Moving Average
@@ -300,7 +300,7 @@ class TenderEnter(IStrategy):
         # dataframe['sar'] = ta.SAR(dataframe)
 
         # TEMA - Triple Exponential Moving Average
-        # dataframe['tema'] = ta.TEMA(dataframe, timeperiod=9)
+        dataframe['tema'] = ta.TEMA(dataframe, timeperiod=9)
 
         # Cycle Indicator
         # ------------------------------------
@@ -387,29 +387,30 @@ class TenderEnter(IStrategy):
         :param metadata: Additional information, like the currently traded pair
         :return: DataFrame with buy column
         """
+        k=1.06
         params = {
-            'c-ratio': 0.37954,
-            'c-k': 0.1,
-            'v-ratio': 1.94154,
-            'v-k': 0.5,
-            'avg-ratio': 5
-        }
+            'avg-ratio': 1.001,
+            'avg-ratio2': -1.003
+                   }
     
         dataframe.loc[(
-            self.compareFields(dataframe, 'close', 1, params['c-ratio']) &
-            self.compareFields(dataframe, 'close', 2, params['c-ratio'] + params['c-k']) &
-            self.compareFields(dataframe, 'close', 3, params['c-ratio'] + params['c-k']*2) &
+            # self.compareFields(dataframe, 'close', 1, params['c-ratio']) &
+            # self.compareFields(dataframe, 'close', 2, params['c-ratio'] * k) &
+            # self.compareFields(dataframe, 'close', 3, params['c-ratio'] * k * k) &
 
-            self.compareFields(dataframe, 'volume', 1, params['v-ratio']) &
-            self.compareFields(dataframe, 'volume', 2, params['v-ratio'] + params['v-k']) &
-            self.compareFields(dataframe, 'volume', 3, params['v-ratio'] + params['v-k']) &
-
-            self.compareFields(dataframe, 'ema50', 1, params['v-ratio']) &
+            # self.compareFields(dataframe, 'volume', 1, params['v-ratio']) &
+            # self.compareFields(dataframe, 'volume', 2, params['v-ratio']) &
+            # self.compareFields(dataframe, 'volume', 3, params['v-ratio']) &
+            self.compareFields(dataframe, 'tema', 1, params['avg-ratio']) &
+            self.compareFieldsRev(dataframe, 'ema50', 3, params['avg-ratio']) &
             (dataframe['volume'] > 0)),'buy'] = 1
         return dataframe
 
     def compareFields(self, dt, fieldname, shift, ratio=1.034):
-        return dt[fieldname].shift(shift-1)/dt[fieldname].shift(shift) > ratio
+        return dt[fieldname]/dt[fieldname].shift(shift) > ratio
+    
+    def compareFieldsRev(self, dt, fieldname, shift, ratio=1.034):
+        return dt[fieldname]/dt[fieldname].shift(shift) < ratio
 
     # def calcAngle(self, p1, p2, delta_x) -> bool:
     #     delta_y = p2 - p1
