@@ -44,8 +44,11 @@ class AllPairs(IHyperOpt):
         """
         Define the buy strategy parameters to be used by Hyperopt.
         """
-        def compareFields(dt, fieldname, shift):
-            return dt[fieldname].shift(shift-1)/dt[fieldname].shift(shift)
+        def compareFields(dt, fieldname, shift, ratio=1.034):
+            return dt[fieldname]/dt[fieldname].shift(shift) > ratio
+    
+        def compareFieldsRev(dt, fieldname, shift, ratio=1.034):
+            return dt[fieldname]/dt[fieldname].shift(shift) < ratio
 
         def populate_buy_trend(dataframe: DataFrame, metadata: dict) -> DataFrame:
             """
@@ -56,13 +59,8 @@ class AllPairs(IHyperOpt):
             """
         
             dataframe.loc[(
-                
-                (compareFields(dataframe, 'close', 1) - compareFields(dataframe, 'close', 2) > params['c-r']/100) &
-                (compareFields(dataframe, 'close', 2) > compareFields(dataframe, 'close', 3)) &
-                (compareFields(dataframe, 'volume', 1) - compareFields(dataframe, 'volume', 2) > params['v-r']) &
-                (compareFields(dataframe, 'volume', 2) > compareFields(dataframe, 'volume', 3)) &
-                # (compareFields(dataframe, params['avg'], 1) - compareFields(dataframe, params['avg'], 2) > params['e-r']) &
-                # (compareFields(dataframe, params['avg'], 2) > compareFields(dataframe, params['avg'], 3)) &
+                compareFields(dataframe, 'tema', 1, params['k1']) &
+                compareFieldsRev(dataframe, 'ema50', 3, params['k2']) &
                 (dataframe['volume'] > 0)),'buy'] = 1
             return dataframe
 
@@ -76,8 +74,8 @@ class AllPairs(IHyperOpt):
         Define your Hyperopt space for searching buy strategy parameters.
         """
         return [
-            Real(0, 2, name='c-r'),
-            Real(0, 2, name='v-r'),
+            Real(1, 1.1, name='k1'),
+            Real(-1.1, -1, name='k2'),
             # Real(0, 2, name='e-ы'),
             # Real(-2, 2, name='a-r'),
             # Categorical([1.001, 1.01, 1.03, 1.07, 1.1, 1.24, 1.5], name='c-ratio'),
