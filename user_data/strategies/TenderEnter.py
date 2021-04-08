@@ -55,14 +55,14 @@ class TenderEnter(IStrategy):
     stoploss = -0.2
 
     params = {
-     'k1': 1.01566, 'k2': 1.07197
+     'k1': 0.94342, 'k2': 1.05321
     }
 
     # Trailing stop:
     trailing_stop = True
-    trailing_stop_positive = 0.01298
-    trailing_stop_positive_offset = 0.1008
-    trailing_only_offset_is_reached = False
+    trailing_stop_positive = 0.22242
+    trailing_stop_positive_offset = 0.24617
+    trailing_only_offset_is_reached = True
     # trailing_stop_positive_offset = 0.21178
     # trailing_only_offset_is_reached = False
     # minimal_roi = {
