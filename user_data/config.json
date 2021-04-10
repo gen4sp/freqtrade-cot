@@ -1,7 +1,7 @@
 {
     "max_open_trades": 1000,
     "stake_currency": "USDT",
-    "stake_amount": 1000,
+    "stake_amount": 100,
     "tradable_balance_ratio": 0.90,
     "fiat_display_currency": "USD",
     "timeframe": "5m",
@@ -281,8 +281,8 @@
     },
     "telegram": {
         "enabled": true,
-        "token": "1562614708:AAGEw2vfoK6OES4J2W8PVkC_4uY3LcAlsxU",
-        "chat_id": "-490837746"
+        "token": "1679861024:AAE18y4fgWIm3gpFfQ9aaj0_DpGDjO4GVJ8",
+        "chat_id": "-499504337"
     },
     "api_server": {
         "enabled": false,
