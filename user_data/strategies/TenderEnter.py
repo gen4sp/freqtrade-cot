@@ -52,14 +52,14 @@ class TenderEnter(IStrategy):
     }
 
     # Stoploss:
-    stoploss = -0.2
+    stoploss = -1.2
 
-    params = {
-     'k1': 1.01566, 'k2': 1.07197
-    }
+    # params = {
+    #  'k1': 1.01566, 'k2': 1.07197
+    # }
 
     # Trailing stop:
-    trailing_stop = True
+    trailing_stop = False
     trailing_stop_positive = 0.01298
     trailing_stop_positive_offset = 0.1008
     trailing_only_offset_is_reached = False
@@ -170,9 +170,9 @@ class TenderEnter(IStrategy):
         # # EMA - Exponential Moving Average
         # dataframe['ema3'] = ta.EMA(dataframe, timeperiod=3)
         # dataframe['ema5'] = ta.EMA(dataframe, timeperiod=5)
-        dataframe['ema10'] = ta.EMA(dataframe, timeperiod=10)
+        # dataframe['ema10'] = ta.EMA(dataframe, timeperiod=10)
         # dataframe['ema21'] = ta.EMA(dataframe, timeperiod=21)
-        dataframe['ema50'] = ta.EMA(dataframe, timeperiod=50)
+        # dataframe['ema50'] = ta.EMA(dataframe, timeperiod=50)
         # dataframe['ema100'] = ta.EMA(dataframe, timeperiod=100)
 
         # # SMA - Simple Moving Average
@@ -207,16 +207,16 @@ class TenderEnter(IStrategy):
             # self.compareFields(dataframe, 'volume', 1, params['v-ratio']) &
             # self.compareFields(dataframe, 'volume', 2, params['v-ratio']) &
             # self.compareFields(dataframe, 'volume', 3, params['v-ratio']) &
-            self.compareFields(dataframe, 'tema', 1, self.params['k1']) &
-            self.compareFieldsRev(dataframe, 'ema50', 3, self.params['k2']) &
+            # self.compareFields(dataframe, 'tema', 1, self.params['k1']) &
+            # self.compareFieldsRev(dataframe, 'ema50', 3, self.params['k2']) &
             (dataframe['volume'] > 0)),'buy'] = 1
         return dataframe
 
-    def compareFields(self, dt, fieldname, shift, ratio=1.034):
-        return dt[fieldname]/dt[fieldname].shift(shift) > ratio
+    # def compareFields(self, dt, fieldname, shift, ratio=1.034):
+    #     return dt[fieldname]/dt[fieldname].shift(shift) > ratio
     
-    def compareFieldsRev(self, dt, fieldname, shift, ratio=1.034):
-        return dt[fieldname]/dt[fieldname].shift(shift) < ratio
+    # def compareFieldsRev(self, dt, fieldname, shift, ratio=1.034):
+    #     return dt[fieldname]/dt[fieldname].shift(shift) < ratio
 
     # def calcAngle(self, p1, p2, delta_x) -> bool:
     #     delta_y = p2 - p1
