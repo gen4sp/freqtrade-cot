@@ -52,7 +52,7 @@ class TenderEnter(IStrategy):
     }
 
     # Stoploss:
-    stoploss = -1.2
+    stoploss = -0.5
 
     # params = {
     #  'k1': 1.01566, 'k2': 1.07197
@@ -60,8 +60,8 @@ class TenderEnter(IStrategy):
 
     # Trailing stop:
     trailing_stop = False
-    trailing_stop_positive = 0.01298
-    trailing_stop_positive_offset = 0.1008
+    # trailing_stop_positive = 0.01298
+    # trailing_stop_positive_offset = 0.1008
     trailing_only_offset_is_reached = False
     # trailing_stop_positive_offset = 0.21178
     # trailing_only_offset_is_reached = False
@@ -103,7 +103,7 @@ class TenderEnter(IStrategy):
     ignore_roi_if_buy_signal = True
 
     # Number of candles the strategy requires before producing valid signals
-    startup_candle_count: int = 50
+    startup_candle_count: int = 1
     
     
     # Optional order type mapping.
